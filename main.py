@@ -6,12 +6,15 @@ import pdb
 
 if __name__ == '__main__':
     eng = Engine()
+    eng.initialization()
 
     while not tdl.event.isWindowClosed():
         stop = eng.update()
         
         if stop:
             break
+
+        print('updating')
 
         eng.rendering()
         tdl.flush()

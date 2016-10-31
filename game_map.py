@@ -1,9 +1,25 @@
 from tile import *
 from colors import *
+from geometry import *
+
+import math
+
+import random as rn
+
+import pdb
 
 MAP_TILES = {'wall': '#', 'floor': '.'}
 NOT_VISIBLE_COLORS = {'.': (25, 25, 25), '#': (50, 50, 50)}
 VISIBLE_COLORS = {'.': (100, 100, 100), '#': (150, 150, 150)}
+
+FOV_ALGO = 0
+FOV_LIGHT_WALLS = True
+TORCH_RADIUS = 20
+
+MIN_ROOM = 5
+MAX_ROOM = 30
+MIN_ROOM_SIZE = 3
+MAX_ROOM_SIZE = 10
 
 class GameMap:
     def __init__(self, width, height):
@@ -103,7 +119,6 @@ class GameMap:
         monster_count = 0
 
         self.clear_map()
-        initialize_fov()
 
         while num_rooms < MAX_ROOM:
 
@@ -119,8 +134,8 @@ class GameMap:
 
                 w = rn.randint(MIN_ROOM_SIZE, MAX_ROOM_SIZE)
                 h = rn.randint(MIN_ROOM_SIZE, MAX_ROOM_SIZE)
-                x = rn.randint(1, MAP_WIDTH - w - 1)
-                y = rn.randint(1, MAP_HEIGHT - h - 1)
+                x = rn.randint(1, self._width - w - 1)
+                y = rn.randint(1, self._height - h - 1)
 
                 new_room = Rect(x, y, w, h)
 
@@ -159,3 +174,29 @@ class GameMap:
             num_rooms += 1
 
         return return_coordinates
+
+
+
+
+    def draw_map(self, fov_map, player_x, player_y, display_x, display_y, map_console):
+
+        visible_tiles = []
+
+        self.clear_map()
+
+        visible_tiles_iter = fov_map.compute_fov(player_x, player_y, radius=TORCH_RADIUS, light_walls=FOV_LIGHT_WALLS)
+
+
+        for tile in visible_tiles_iter:
+            visible_tiles.append(tile)
+
+
+        for x in range(display_x):
+            for y in range(display_y):
+
+                if (x, y) in visible_tiles:
+                    self._map_array[x][y].explored = True
+                    map_console.draw_char(x, y, self._map_array[x][y].ch, fg=VISIBLE_COLORS[self._map_array[x][y].ch], bg=self._map_array[x][y].bkg_color)
+                else:
+                    if self._map_array[x][y].explored:
+                        map_console.draw_char(x, y, self._map_array[x][y].ch, fg=NOT_VISIBLE_COLORS[self._map_array[x][y].ch], bg=self._map_array[x][y].bkg_color)

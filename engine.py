@@ -18,6 +18,14 @@ PANEL_HEIGHT = CONSOLE_HEIGHT - MESSAGE_HEIGHT
 MAP_WIDTH = 200
 MAP_HEIGHT = 200
 
+FOV_ALGO = 0
+FOV_LIGHT_WALLS = True
+TORCH_RADIUS = 20
+
+MAP_TILES = {'wall': '#', 'floor': '.'}
+NOT_VISIBLE_COLORS = {'.': (25, 25, 25), '#': (50, 50, 50)}
+VISIBLE_COLORS = {'.': (100, 100, 100), '#': (150, 150, 150)}
+
 MOVEMENT_KEYS = {'KP5': [0, 0], 'KP2': [0, 1], 'KP1': [-1, 1], 'KP4': [-1, 0], 'KP7': [-1, -1], 'KP8': [0, -1], 'KP9': [1, -1], 'KP6': [1, 0], 'KP3': [1, 1]}
 
 
@@ -25,24 +33,43 @@ class Engine:
     def __init__(self):
         tdl.set_font('fonts/Kelora_16x16_diagonal.png')
         self._main_console = tdl.init(CONSOLE_WIDTH, CONSOLE_HEIGHT)
-
         self._map_console = tdl.init(DUNGEON_DISPLAY_WIDTH, DUNGEON_DISPLAY_HEIGHT)
 
-        self._width = width
-        self._height = height
-
-        self._game_map = GameMap(width, height)
-        self._fov_map = tdl.map.Map(width, height)
+        self._game_map = GameMap(DUNGEON_DISPLAY_WIDTH, DUNGEON_DISPLAY_HEIGHT)
+        self._fov_map = tdl.map.Map(DUNGEON_DISPLAY_WIDTH, DUNGEON_DISPLAY_HEIGHT)
         self._fov_recompute = True
+
+        self._a_star = tdl.map.AStar(DUNGEON_DISPLAY_WIDTH, DUNGEON_DISPLAY_HEIGHT, self.move_cost, diagnalCost=1)
+
+        self._current_map_level = 1
 
         self._entities = []
         
         self._game_state = 'main_menu'
 
-        self._player = Player(0, 0, '@')
+        self._player = Player(-1, -1, '@')
         self._player_action = 'didnt_take_turn'
 
         
+
+    def initialization(self):
+        (self._player.x, self._player.y) = self._game_map.create_map()
+        self.initialize_fov()
+
+
+
+        
+    def initialize_fov(self):
+        self._fov_recompute = True
+
+        for x, y in self._fov_map:
+            self._fov_map.transparent[x, y] = not self._game_map.map_array[x][y].block_sight
+            self._fov_map.walkable[x, y] = not self._game_map.map_array[x][y].blocked
+
+        self._map_console.clear()
+
+
+
 
 
     def handling_keys(self):
@@ -99,27 +126,27 @@ class Engine:
 
 
 
-    def initialize_fov(self):
-        self._fov_recompute = True
-
-        for x, y in fov_map:
-            self._fov_map.transparent[x, y] = not game_map.map_array[x][y].block_sight
-            self._fov_map.walkable[x, y] = not game_map.map_array[x][y].blocked
-
-        self._map_console.clear()
 
     def clear_display(self):
-        for x in range(self._width):
-            for y in range(self._height):
+        for x in range(CONSOLE_WIDTH):
+            for y in range(CONSOLE_HEIGHT):
                 self._main_console.draw_char(x, y, ' ')
 
 
 
+    
 
     def rendering(self):
+
+        self._game_map.draw_map(self._fov_map, self._player.x, self._player.y, DUNGEON_DISPLAY_WIDTH, DUNGEON_DISPLAY_HEIGHT, self._map_console)
+
+        self._main_console.blit(self._map_console, 0, 0, DUNGEON_DISPLAY_WIDTH, DUNGEON_DISPLAY_HEIGHT, 0, 0)
+
         for elem in self._entities:
-            elem.draw(self._main_console)
-        self._player.draw(self._main_console)
+            elem.draw(self._map_console)
+        self._player.draw(self._map_console)
+
+        self._main_console.blit(self._map_console, 0, 0, DUNGEON_DISPLAY_WIDTH, DUNGEON_DISPLAY_HEIGHT, 0, 0)
     
 
 
@@ -133,5 +160,5 @@ class Engine:
         if self._player_action == 'exit':
             return True
 
-        self.clear_display()
+        #self.clear_display()
         self.rendering()
