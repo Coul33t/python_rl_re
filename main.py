@@ -5,7 +5,7 @@ import tdl
 import pdb
 
 if __name__ == '__main__':
-    eng = Engine(90,50)
+    eng = Engine()
 
     while not tdl.event.isWindowClosed():
         stop = eng.update()

@@ -1,3 +1,5 @@
+from colors import *
+
 class Tile:
     def __init__(self, ch, blocked=True, block_sight=True, color=white, bkg_color = None):
         self._ch = ch
