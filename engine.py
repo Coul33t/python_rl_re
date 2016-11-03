@@ -3,13 +3,13 @@ from game_map import *
 
 import tdl
 
-CONSOLE_WIDTH = 90
-CONSOLE_HEIGHT = 50
+CONSOLE_WIDTH = 100
+CONSOLE_HEIGHT = 40
 
 MESSAGE_WIDTH = CONSOLE_WIDTH
-MESSAGE_HEIGHT = 12
+MESSAGE_HEIGHT = 10
 
-DUNGEON_DISPLAY_WIDTH = 60
+DUNGEON_DISPLAY_WIDTH = 80
 DUNGEON_DISPLAY_HEIGHT = CONSOLE_HEIGHT-MESSAGE_HEIGHT
 
 PANEL_WIDTH = CONSOLE_WIDTH - DUNGEON_DISPLAY_WIDTH
@@ -31,9 +31,11 @@ MOVEMENT_KEYS = {'KP5': [0, 0], 'KP2': [0, 1], 'KP1': [-1, 1], 'KP4': [-1, 0], '
 
 class Engine:
     def __init__(self):
-        tdl.set_font('fonts/Kelora_16x16_diagonal.png')
+        tdl.set_font('fonts/Bedstead_12x20.png')
         self._main_console = tdl.init(CONSOLE_WIDTH, CONSOLE_HEIGHT)
-        self._map_console = tdl.init(DUNGEON_DISPLAY_WIDTH, DUNGEON_DISPLAY_HEIGHT)
+        self._map_console = tdl.Console(DUNGEON_DISPLAY_WIDTH, DUNGEON_DISPLAY_HEIGHT)
+        self._panel_console = tdl.Console(PANEL_WIDTH, PANEL_HEIGHT)
+        self._message_console = tdl.Console(MESSAGE_WIDTH, MESSAGE_HEIGHT)
 
         self._game_map = GameMap(DUNGEON_DISPLAY_WIDTH, DUNGEON_DISPLAY_HEIGHT)
         self._fov_map = tdl.map.Map(DUNGEON_DISPLAY_WIDTH, DUNGEON_DISPLAY_HEIGHT)
@@ -130,6 +132,11 @@ class Engine:
             for y in range(console.height):
                 console.draw_char(x, y, ' ')
 
+    def set_console(self, console, color):
+        for x in range(console.width):
+            for y in range(console.height):
+                console.draw_char(x, y, ' ', bg=color)
+
 
 
 
@@ -142,7 +149,6 @@ class Engine:
 
 
     
-
     def rendering(self):
         self.clear_display()
         self._game_map.draw_map(self._fov_map, self._player.x, self._player.y, DUNGEON_DISPLAY_WIDTH, DUNGEON_DISPLAY_HEIGHT, self._map_console)
@@ -153,7 +159,30 @@ class Engine:
             elem.draw(self._map_console)
         self._player.draw(self._map_console)
 
+
+        for x in range(0, PANEL_WIDTH):
+            for y in range(0, PANEL_HEIGHT):
+                if x == 0:
+                    self._panel_console.draw_char(x, y, 0xBA, fg=white)
+
+        for x in range(0, MESSAGE_WIDTH):
+            for y in range(0, MESSAGE_HEIGHT):
+                if y == 0:
+                    if x == DUNGEON_DISPLAY_WIDTH:
+                        self._message_console.draw_char(x, y, 0xCA, fg=white)
+                    else:
+                        self._message_console.draw_char(x, y, 0xCD, fg=white)
+
+                else:
+                    self._message_console.draw_char(x, y, ' ')
+
         self._main_console.blit(self._map_console, 0, 0, DUNGEON_DISPLAY_WIDTH, DUNGEON_DISPLAY_HEIGHT, 0, 0)
+
+        self._main_console.blit(self._panel_console, DUNGEON_DISPLAY_WIDTH, 0, CONSOLE_WIDTH, CONSOLE_HEIGHT)
+
+        self._main_console.blit(self._message_console, 0, DUNGEON_DISPLAY_HEIGHT, MESSAGE_WIDTH, MESSAGE_HEIGHT)
+
+
     
 
 

@@ -172,7 +172,7 @@ class GameMap:
 
 
             rooms.append(new_room)
-            print('room added')
+
             num_rooms += 1
 
         return return_coordinates
