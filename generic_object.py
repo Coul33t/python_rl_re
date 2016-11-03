@@ -76,9 +76,7 @@ class GenericObject:
 
 
 
-    def move(dx, dy):
-        self._x += dx
-        self._y += dy
+    
 
     def draw(self, console):
         console.draw_char(self._x, self._y, self._ch, fg=self._color, bg=self._bkg_color)

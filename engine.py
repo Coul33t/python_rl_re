@@ -55,6 +55,7 @@ class Engine:
     def initialization(self):
         (self._player.x, self._player.y) = self._game_map.create_map()
         self.initialize_fov()
+        self._game_state = 'playing'
 
 
 
@@ -86,7 +87,11 @@ class Engine:
             if self._game_state == 'playing':
 
                 if user_input.key in MOVEMENT_KEYS:
-                    print('Motion !')
+                    
+                    (dx, dy) = (MOVEMENT_KEYS[user_input.key][0],MOVEMENT_KEYS[user_input.key][1])
+                    
+                    if not self._game_map.is_blocked(self._player.x + dx, self._player.y + dy):
+                        self._player.move(dx, dy)
 
                 else:
                     return 'didnt_take_turn'
@@ -120,16 +125,18 @@ class Engine:
 
 
 
-    def clear_map(self):
-        self._game_map.clear_map()
+    def clean_console(self, console):
+        for x in range(console.width):
+            for y in range(console.height):
+                console.draw_char(x, y, ' ')
 
 
 
 
 
     def clear_display(self):
-        for x in range(CONSOLE_WIDTH):
-            for y in range(CONSOLE_HEIGHT):
+        for x in range(self._main_console.width):
+            for y in range(self._main_console.height):
                 self._main_console.draw_char(x, y, ' ')
 
 
@@ -137,7 +144,7 @@ class Engine:
     
 
     def rendering(self):
-
+        self.clear_display()
         self._game_map.draw_map(self._fov_map, self._player.x, self._player.y, DUNGEON_DISPLAY_WIDTH, DUNGEON_DISPLAY_HEIGHT, self._map_console)
 
         self._main_console.blit(self._map_console, 0, 0, DUNGEON_DISPLAY_WIDTH, DUNGEON_DISPLAY_HEIGHT, 0, 0)

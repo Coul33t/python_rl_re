@@ -1,5 +1,5 @@
-from generic_object import *
+from living_entity import *
 
-class Player(GenericObject):
+class Player(LivingEntity):
     def __init__(self, x, y, ch='@'):
         super(Player, self).__init__(x, y, ch)

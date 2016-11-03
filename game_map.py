@@ -9,8 +9,8 @@ import random as rn
 import pdb
 
 MAP_TILES = {'wall': '#', 'floor': '.'}
-NOT_VISIBLE_COLORS = {'.': (25, 25, 25), '#': (50, 50, 50)}
-VISIBLE_COLORS = {'.': (100, 100, 100), '#': (150, 150, 150)}
+NOT_VISIBLE_COLORS = {MAP_TILES['floor']: (25, 25, 25), MAP_TILES['wall']: (50, 50, 50)}
+VISIBLE_COLORS = {MAP_TILES['floor']: (100, 100, 100), MAP_TILES['wall']: (150, 150, 150)}
 
 FOV_ALGO = 0
 FOV_LIGHT_WALLS = True
@@ -18,7 +18,7 @@ TORCH_RADIUS = 20
 
 MIN_ROOM = 5
 MAX_ROOM = 30
-MIN_ROOM_SIZE = 3
+MIN_ROOM_SIZE = 5
 MAX_ROOM_SIZE = 10
 
 class GameMap:
@@ -26,6 +26,7 @@ class GameMap:
         self._width = width
         self._height = height
         self._map_array = [[Tile(MAP_TILES['wall'], color=light_gray) for y in range(height)] for x in range(width)]
+
 
     def _get_width(self):
         return self._width
@@ -171,6 +172,7 @@ class GameMap:
 
 
             rooms.append(new_room)
+            print('room added')
             num_rooms += 1
 
         return return_coordinates
@@ -181,8 +183,6 @@ class GameMap:
     def draw_map(self, fov_map, player_x, player_y, display_x, display_y, map_console):
 
         visible_tiles = []
-
-        self.clear_map()
 
         visible_tiles_iter = fov_map.compute_fov(player_x, player_y, radius=TORCH_RADIUS, light_walls=FOV_LIGHT_WALLS)
 
