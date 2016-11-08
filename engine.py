@@ -1,7 +1,10 @@
 from player import *
 from game_map import *
+from monster import *
+from item import *
 
 import tdl
+import random as rn
 
 CONSOLE_WIDTH = 100
 CONSOLE_HEIGHT = 40
@@ -56,6 +59,11 @@ class Engine:
 
     def initialization(self):
         (self._player.x, self._player.y) = self._game_map.create_map()
+
+        for room in self._game_map.rooms:
+            self.place_monsters(room)
+            self.place_items(room)
+
         self.initialize_fov()
         self._game_state = 'playing'
 
@@ -118,12 +126,44 @@ class Engine:
     def move_cost(self, x, y):
         if self._game_map.is_blocked(x, y):
             return 0
+
         else:
             for entity in entities:
                 if entity.blocks and entity.x == x and entity.y == y:
                     return 10
 
         return 1
+
+
+
+
+    def place_monsters(self, room):
+        nb_monsters = rn.randint(0,3)
+
+        for i in range(nb_monsters):
+            x = rn.randint(room.x1, room.x2 - 1)
+            y = rn.randint(room.y1, room.y2 - 1)
+
+            monster = Monster(x, y)
+
+            print(monster.always_visible)
+            self._entities.append(monster)
+
+
+    def place_items(self, room):
+        nb_items = rn.randint(0,1)
+
+        for i in range(nb_items):
+            x = -1
+            y = -1
+
+            while self._game_map.map_array[x][y].blocked:
+                x = rn.randint(room.x1, room.x2 - 1)
+                y = rn.randint(room.y1, room.y2 - 1)
+
+            item = Item(x, y)
+
+            self._entities.append(item)
 
 
 
@@ -151,13 +191,14 @@ class Engine:
     
     def rendering(self):
         self.clear_display()
-        self._game_map.draw_map(self._fov_map, self._player.x, self._player.y, DUNGEON_DISPLAY_WIDTH, DUNGEON_DISPLAY_HEIGHT, self._map_console)
+        visible_tiles = self._game_map.draw_map(self._fov_map, self._player.x, self._player.y, DUNGEON_DISPLAY_WIDTH, DUNGEON_DISPLAY_HEIGHT, self._map_console)
 
         self._main_console.blit(self._map_console, 0, 0, DUNGEON_DISPLAY_WIDTH, DUNGEON_DISPLAY_HEIGHT, 0, 0)
 
         for elem in self._entities:
-            elem.draw(self._map_console)
-        self._player.draw(self._map_console)
+            elem.draw(visible_tiles, self._map_console)
+            
+        self._player.draw(visible_tiles, self._map_console)
 
 
         for x in range(0, PANEL_WIDTH):

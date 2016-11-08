@@ -1,5 +1,5 @@
 class GenericObject:
-    def __init__(self, x, y, ch, name='NO_NAME', color=(255,255,255), bkg_color=None, blocks=True, always_visible=False):
+    def __init__(self, x, y, ch='X', name='NO_NAME', color=(255,255,255), bkg_color=None, blocks=True, always_visible=False):
         self._x = x
         self._y = y
         self._ch = ch
@@ -78,9 +78,6 @@ class GenericObject:
 
     
 
-    def draw(self, console):
-        console.draw_char(self._x, self._y, self._ch, fg=self._color, bg=self._bkg_color)
-
-
-    def take_turn(self):
-        pass
+    def draw(self, visible_tiles, console):
+        if (self._x, self._y) in visible_tiles or self._always_visible:
+            console.draw_char(self._x, self._y, self._ch, fg=self._color, bg=self._bkg_color)

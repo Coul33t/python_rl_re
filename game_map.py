@@ -26,7 +26,7 @@ class GameMap:
         self._width = width
         self._height = height
         self._map_array = [[Tile(MAP_TILES['wall'], color=light_gray) for y in range(height)] for x in range(width)]
-
+        self._rooms = []
 
     def _get_width(self):
         return self._width
@@ -51,6 +51,14 @@ class GameMap:
         self._map_array = map_array
 
     map_array = property(_get_map_array, _set_map_array)
+
+    def _get_rooms(self):
+        return self._rooms
+
+    def _set_rooms(self, rooms):
+        pass
+
+    rooms = property(_get_rooms, _set_rooms)
 
 
 
@@ -114,7 +122,6 @@ class GameMap:
 
     def create_map(self):
 
-        rooms = []
         num_rooms = 0
 
         monster_count = 0
@@ -140,8 +147,8 @@ class GameMap:
 
                 new_room = Rect(x, y, w, h)
 
-                if rooms:
-                    for other_room in rooms:
+                if self._rooms:
+                    for other_room in self._rooms:
                         if new_room.intersect(other_room):
                             carved = False
                 else:
@@ -156,7 +163,7 @@ class GameMap:
 
             else:
                 closest_room = [-1, -1]
-                for i, other_room in enumerate(rooms):
+                for i, other_room in enumerate(self._rooms):
                     if closest_room == [-1, -1]:
                         closest_room = list(other_room.get_center())
                     else:
@@ -171,7 +178,7 @@ class GameMap:
                     self.carve_h_tunnel(x, closest_room[0], closest_room[1])
 
 
-            rooms.append(new_room)
+            self._rooms.append(new_room)
 
             num_rooms += 1
 
@@ -200,3 +207,5 @@ class GameMap:
                 else:
                     if self._map_array[x][y].explored:
                         map_console.draw_char(x, y, self._map_array[x][y].ch, fg=NOT_VISIBLE_COLORS[self._map_array[x][y].ch], bg=self._map_array[x][y].bkg_color)
+
+        return visible_tiles
