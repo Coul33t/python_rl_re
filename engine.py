@@ -1,5 +1,6 @@
 from game_map import *
 from living_entity import *
+from lifeless_entity import *
 from player import *
 from monster import *
 from item import *
@@ -154,7 +155,7 @@ class Engine:
             x = rn.randint(room.x1, room.x2 - 1)
             y = rn.randint(room.y1, room.y2 - 1)
 
-            monster = LivingEntity(x, y, 'M', name='monster', color=(255,50,50), monster=Monster())
+            monster = LivingEntity(x, y, 'M', name='generic_monster', color=(255,50,50), monster=Monster())
 
             print(monster.always_visible)
             self._entities.append(monster)
@@ -171,7 +172,7 @@ class Engine:
                 x = rn.randint(room.x1, room.x2 - 1)
                 y = rn.randint(room.y1, room.y2 - 1)
 
-            item = Item(x, y)
+            item = LifelessEntity(x, y, name='generic_item', item=Item())
 
             self._entities.append(item)
 
