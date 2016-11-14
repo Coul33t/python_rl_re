@@ -1,5 +1,6 @@
-from player import *
 from game_map import *
+from living_entity import *
+from player import *
 from monster import *
 from item import *
 
@@ -52,7 +53,7 @@ class Engine:
         
         self._game_state = 'main_menu'
 
-        self._player = Player(-1, -1, '@')
+        self._player = LivingEntity(-1, -1, '@', name='player', player=Player())
         self._player_action = 'didnt_take_turn'
 
         
@@ -100,14 +101,16 @@ class Engine:
                     
                     (dx, dy) = (MOVEMENT_KEYS[user_input.key][0],MOVEMENT_KEYS[user_input.key][1])
                     
+                    target = None
+
                     for entity in self._entities:
-                        if entity.x == self._player.x and entity.y == self._player.y:
+                        if entity.x == self._player.x + dx and entity.y == self._player.y + dy:
                             target = entity
 
                     if target is not None:
                         self._player.attack(target)
 
-                    if not self._game_map.is_blocked(self._player.x + dx, self._player.y + dy):
+                    elif not self._game_map.is_blocked(self._player.x + dx, self._player.y + dy):
                         self._player.move(dx, dy)
 
                 else:
@@ -151,7 +154,7 @@ class Engine:
             x = rn.randint(room.x1, room.x2 - 1)
             y = rn.randint(room.y1, room.y2 - 1)
 
-            monster = Monster(x, y)
+            monster = LivingEntity(x, y, 'M', name='monster', color=(255,50,50), monster=Monster())
 
             print(monster.always_visible)
             self._entities.append(monster)
