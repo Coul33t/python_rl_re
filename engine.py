@@ -100,6 +100,13 @@ class Engine:
                     
                     (dx, dy) = (MOVEMENT_KEYS[user_input.key][0],MOVEMENT_KEYS[user_input.key][1])
                     
+                    for entity in self._entities:
+                        if entity.x == self._player.x and entity.y == self._player.y:
+                            target = entity
+
+                    if target is not None:
+                        self._player.attack(target)
+
                     if not self._game_map.is_blocked(self._player.x + dx, self._player.y + dy):
                         self._player.move(dx, dy)
 
