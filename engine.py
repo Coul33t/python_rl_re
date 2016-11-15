@@ -147,17 +147,32 @@ class Engine:
 
 
 
-
+    #TODO: merge place_monster and place_items
     def place_monsters(self, room):
         nb_monsters = rn.randint(0,3)
 
         for i in range(nb_monsters):
-            x = rn.randint(room.x1, room.x2 - 1)
-            y = rn.randint(room.y1, room.y2 - 1)
+
+            x = -1
+            y = -1
+
+            blocked = True
+
+            while blocked:
+                x = rn.randint(room.x1, room.x2 - 1)
+                y = rn.randint(room.y1, room.y2 - 1)
+
+                blocked = False
+
+                for entity in self._entities:
+                    if entity.x == x and entity.y == y:
+                        blocked = True
+
+                if self._game_map.map_array[x][y].blocked:
+                    blocked = True
 
             monster = LivingEntity(x, y, 'M', name='generic_monster', color=(255,50,50), monster=Monster())
 
-            print(monster.always_visible)
             self._entities.append(monster)
 
 
@@ -168,9 +183,22 @@ class Engine:
             x = -1
             y = -1
 
-            while self._game_map.map_array[x][y].blocked:
+            blocked = True
+
+            while blocked:
                 x = rn.randint(room.x1, room.x2 - 1)
                 y = rn.randint(room.y1, room.y2 - 1)
+
+                blocked = False
+
+                for entity in self._entities:
+                    if entity.x == x and entity.y == y:
+                        blocked = True
+
+                if self._game_map.map_array[x][y].blocked:
+                    blocked = True
+
+                    
 
             item = LifelessEntity(x, y, name='generic_item', item=Item())
 
