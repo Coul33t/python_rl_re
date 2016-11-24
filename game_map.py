@@ -121,10 +121,12 @@ class GameMap:
 
 
     def create_map(self):
+        return self.basic_dungeon()
+        
 
+
+    def basic_dungeon(self):
         num_rooms = 0
-
-        monster_count = 0
 
         self.clear_map()
 
@@ -183,6 +185,111 @@ class GameMap:
             num_rooms += 1
 
         return return_coordinates
+
+
+
+    #http://rjevans.net/post/94011964910/monsters-monocles-devblog-mansion-room
+    def gossrix(self):
+        num_rooms = 0
+
+        final_num_rooms = rn.randint(MIN_ROOM, MAX_ROOM)
+
+        while num_rooms < final_num_rooms:
+            
+            valid_position = False
+
+            while not valid_position:
+                x = rn.randint(1, self._width - MAX_ROOM_SIZE/2 + 1)  
+                y = rn.randint(1, self._height - MAX_ROOM_SIZE/2 + 1)
+                w = MIN_ROOM_SIZE
+                h = MIN_ROOM_SIZE
+
+                new_room = Rect(x, y, w, h)
+
+                if self._rooms:
+                    for other_room in self._rooms:
+                        if new_room.intersect(other_room):
+                            valid_position = False
+                else:
+                    valid_position = True
+
+
+        #From here, we have a set of MIN_ROOM_SIZE*MIN_ROOM_SIZE rooms
+        #Now, we will grow a random room in a random direction (if possible)
+
+        finished = [1 for x in range(len(self._rooms)-1)]
+
+        while math.sum(finished) > 0:
+            room_to_expand = rn.randint(0, len(self._rooms) - 1)
+
+            #order : top, right, bottom, left
+            direction_to_expand = rn.randint(0,3)
+
+            valid_expand = True
+
+            if direction_to_expand == 'top':
+                #If we're not at the border of the map
+                if self._rooms[room_to_expand].y > 1:
+                    
+                    new_room = self._rooms[i]
+                    new_room.y -= 1
+
+                    for other_room in self._rooms:
+                        if new_room.intersect(other_room):
+                            valid_expand = False
+
+                    if valid_expand:
+                        self._rooms[i] = new_room
+
+            if direction_to_expand == 'right':
+                #If we're not at the border of the map
+                if self._rooms[room_to_expand].x < self._width - 1:
+                    
+                    new_room = self._rooms[i]
+                    new_room.w += 1
+
+                    for other_room in self._rooms:
+                        if new_room.intersect(other_room):
+                            valid_expand = False
+
+                    if valid_expand:
+                        self._rooms[i] = new_room
+
+            if direction_to_expand == 'bottom':
+                #If we're not at the border of the map
+                if self._rooms[room_to_expand].y < self._height - 1:
+                    
+                    new_room = self._rooms[i]
+                    new_room.h += 1
+
+                    for other_room in self._rooms:
+                        if new_room.intersect(other_room):
+                            valid_expand = False
+
+                    if valid_expand:
+                        self._rooms[i] = new_room
+
+            if direction_to_expand == 'left':
+                #If we're not at the border of the map
+                if self._rooms[room_to_expand].x > 1:
+                    
+                    new_room = self._rooms[i]
+                    new_room.x -= 1
+
+                    for other_room in self._rooms:
+                        if new_room.intersect(other_room):
+                            valid_expand = False
+
+                    if valid_expand:
+                        self._rooms[i] = new_room
+
+
+
+
+        for room in self._rooms:
+            self.create_room(room)
+
+
 
 
 

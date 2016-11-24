@@ -5,6 +5,9 @@ from player import *
 from monster import *
 from item import *
 
+from death_functions import *
+from ais import *
+
 import tdl
 import random as rn
 
@@ -51,10 +54,12 @@ class Engine:
         self._current_map_level = 1
 
         self._entities = []
+        self._objects = []
+        self._visible_tiles = []
         
         self._game_state = 'main_menu'
 
-        self._player = LivingEntity(-1, -1, '@', name='player', player=Player())
+        self._player = LivingEntity(-1, -1, '@', name='player', player=Player(), death_function=player_death)
         self._player_action = 'didnt_take_turn'
 
         
@@ -105,11 +110,12 @@ class Engine:
                     target = None
 
                     for entity in self._entities:
-                        if entity.x == self._player.x + dx and entity.y == self._player.y + dy:
+                        if entity.x == self._player.x + dx and entity.y == self._player.y + dy and entity and not entity.dead:
                             target = entity
 
                     if target is not None:
                         self._player.attack(target)
+
 
                     elif not self._game_map.is_blocked(self._player.x + dx, self._player.y + dy):
                         self._player.move(dx, dy)
@@ -139,7 +145,7 @@ class Engine:
             return 0
 
         else:
-            for entity in entities:
+            for entity in self._entities:
                 if entity.blocks and entity.x == x and entity.y == y:
                     return 10
 
@@ -171,7 +177,7 @@ class Engine:
                 if self._game_map.map_array[x][y].blocked:
                     blocked = True
 
-            monster = LivingEntity(x, y, 'M', name='generic_monster', color=(255,50,50), monster=Monster())
+            monster = LivingEntity(x, y, 'M', name='generic_monster', color=(255,50,50), monster=Monster(ai = basic_monster_ai), death_function = monster_death)
 
             self._entities.append(monster)
 
@@ -195,14 +201,20 @@ class Engine:
                     if entity.x == x and entity.y == y:
                         blocked = True
 
+
                 if self._game_map.map_array[x][y].blocked:
                     blocked = True
 
                     
 
-            item = LifelessEntity(x, y, name='generic_item', item=Item())
+            item = LifelessEntity(x, y, name='generic_item', blocks=False, color=(150,150,255), item=Item())
 
-            self._entities.append(item)
+            self._objects.append(item)
+
+
+    def send_to_back(self, entity):
+        self._entities.remove(entity)
+        self._entities.insert(0, entity)
 
 
 
@@ -230,14 +242,17 @@ class Engine:
     
     def rendering(self):
         self.clear_display()
-        visible_tiles = self._game_map.draw_map(self._fov_map, self._player.x, self._player.y, DUNGEON_DISPLAY_WIDTH, DUNGEON_DISPLAY_HEIGHT, self._map_console)
+        self._visible_tiles = self._game_map.draw_map(self._fov_map, self._player.x, self._player.y, DUNGEON_DISPLAY_WIDTH, DUNGEON_DISPLAY_HEIGHT, self._map_console)
 
         self._main_console.blit(self._map_console, 0, 0, DUNGEON_DISPLAY_WIDTH, DUNGEON_DISPLAY_HEIGHT, 0, 0)
 
+        for elem in self._objects:
+            elem.draw(self._visible_tiles, self._map_console)
+
         for elem in self._entities:
-            elem.draw(visible_tiles, self._map_console)
+            elem.draw(self._visible_tiles, self._map_console)
             
-        self._player.draw(visible_tiles, self._map_console)
+        self._player.draw(self._visible_tiles, self._map_console)
 
 
         for x in range(0, PANEL_WIDTH):
@@ -275,6 +290,15 @@ class Engine:
 
         if self._player_action == 'exit':
             return True
+
+        elif self._game_state == 'playing' and self._player_action is not 'didnt_take_turn':
+            for entity in self._entities:
+                if entity.monster and entity.monster.ai:
+                    entity.monster.take_turn(self._visible_tiles, self._a_star, self._player)
+
+        for elem in self._entities:
+            if elem.dead:
+                self.send_to_back(elem)
 
         #self.clear_display()
         self.rendering()
