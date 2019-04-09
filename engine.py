@@ -53,13 +53,13 @@ class Engine:
         self.current_map_level = 1
 
         self.entities = []
-        
+
         self.game_state = 'main_menu'
 
         self.player = Player(-1, -1, '@')
         self.player_action = 'didnt_take_turn'
 
-        
+
 
     def initialization(self):
         (self.player.x, self.player.y) = self.game_map.create_map()
@@ -73,7 +73,7 @@ class Engine:
 
 
 
-        
+
     def initialize_fov(self):
         self.fov_recompute = True
 
@@ -101,7 +101,7 @@ class Engine:
             if self.game_state == 'playing':
                 # Movement and/or attack
                 if user_input.text in MOVEMENT_KEYS:
-                    
+
                     (dx, dy) = (MOVEMENT_KEYS[user_input.text][0],MOVEMENT_KEYS[user_input.text][1])
 
                     # Ok
@@ -206,7 +206,7 @@ class Engine:
 
 
 
-    
+
     def rendering(self):
         self.clear_display()
 
@@ -218,7 +218,7 @@ class Engine:
 
         for en in self.entities:
             en.draw(visible_tiles, self.map_console)
-            
+
         self.player.draw(visible_tiles, self.map_console)
 
         for x in range(0, PANEL_WIDTH):
@@ -244,7 +244,7 @@ class Engine:
         self.main_console.blit(self.message_console, 0, DUNGEON_DISPLAY_HEIGHT, MESSAGE_WIDTH, MESSAGE_HEIGHT)
 
 
-    
+
 
 
     def check_death(self):
@@ -266,8 +266,5 @@ class Engine:
                 en.take_turn(self.player, self.a_star, self.entities)
 
         self.check_death()
-
-        #self.clear_display()
-        self.rendering()
 
         tdl.flush()
